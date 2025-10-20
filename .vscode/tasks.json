@@ -1,0 +1,30 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Install backend dependencies",
+			"type": "shell",
+			"command": "cd backend && npm install"
+		},
+		{
+			"label": "Install frontend dependencies",
+			"type": "shell",
+			"command": "cd frontend && npm install"
+		},
+		{
+			"label": "Start PostgreSQL with Docker Compose",
+			"type": "shell",
+			"command": "docker-compose up -d"
+		},
+		{
+			"label": "Start backend server",
+			"type": "shell",
+			"command": "cd backend && npm run dev"
+		},
+		{
+			"label": "Start frontend server",
+			"type": "shell",
+			"command": "cd frontend && npm run dev"
+		}
+	]
+}
