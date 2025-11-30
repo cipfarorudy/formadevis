@@ -1,107 +1,83 @@
-# Instructions pour les agents IA sur ce projet
+﻿# Instructions pour les agents IA - FormaDevis
 
 ## Vue d'ensemble
-Ce projet gère la création de devis de formation, avec une architecture séparée backend (API REST Node.js/Express) et frontend (React + TypeScript). Les interactions IA reposent sur le dossier `.snapshots` pour le contexte et la configuration.
+Application de creation de devis de formation avec architecture monorepo : backend Node.js/Express + frontend React/TypeScript/Vite.
 
-## Architecture principale
-- **Backend** (`backend/`) :
-  - Point d’entrée : `src/app.js`
-  - Dossiers clés :
-    - `controllers/` : logique métier
-    - `routes/` : endpoints API
-    - `models/` : schémas DB (Sequelize/Prisma)
-    - `services/` : génération PDF, envoi mail
-    - `middleware/` : auth, validation
-    - `config/` : configuration DB, SMTP, .env
-  - Stockage temporaire des logos : `uploads/`
-  - Fichiers importants : `.env.example`, `package.json`
+## Architecture actuelle
 
-- **Frontend** (`frontend/`) :
-  - Point d’entrée : `src/App.tsx`, `src/main.tsx`
-  - Dossiers clés :
-    - `components/` : composants réutilisables
-    - `pages/` : écrans principaux
-    - `services/` : appels API
-    - `context/` : AuthContext, etc.
-    - `utils/` : helpers, formatage
-  - Configuration UI : `tailwind.config.js`
-  - Fichiers statiques : `public/logo-placeholder.png`, `package.json`
+```
+formadevis/
+ backend/           # API REST Express
+    src/app.js     # Point d'entree (Express minimal)
+    .env.example   # Variables d'environnement requises
+ frontend/          # SPA React + Vite + Tailwind
+    src/App.tsx    # Composant racine
+    src/main.tsx   # Bootstrap React
+    index.html     # Template HTML
+ docker-compose.yml # PostgreSQL local
+```
 
-- **Intégrations** :
-  - Base de données (PostgreSQL, via docker-compose ou config locale)
-  - SMTP pour l’envoi de mails
-  - Génération de PDF côté backend
+## Stack technique
+| Couche | Technologies |
+|--------|-------------|
+| Backend | Express 4, PostgreSQL (pg), JWT, bcrypt, Puppeteer (PDF), Nodemailer |
+| Frontend | React 18, TypeScript, Vite 4, Tailwind CSS 3 |
+| Tests | Vitest + Testing Library (frontend) |
+| Infra | Docker Compose pour PostgreSQL |
 
-## Conventions et patterns
-- Respecter la séparation des responsabilités par dossier (ex : logique métier dans `controllers/`, API dans `routes/`).
-- Utiliser les services pour toute logique transversale (PDF, mail).
-- Les composants React sont typés (TypeScript) et organisés par réutilisabilité.
-- Les appels API frontend passent par `frontend/src/services/`.
-- Les fichiers de configuration et d’environnement sont centralisés dans `backend/src/config/` et `.env.example`.
+## Commandes essentielles
 
-## Workflows typiques
-- **Démarrage backend** :
-  - Installer les dépendances : `npm install` dans `backend/`
-  - Lancer le serveur : `npm start` ou `node src/app.js`
-- **Démarrage frontend** :
-  - Installer les dépendances : `npm install` dans `frontend/`
-  - Lancer l’UI : `npm start` ou `npm run dev`
-- **Docker** :
-  - Utiliser `docker-compose.yml` pour lancer la DB locale
+```bash
+# Base de donnees PostgreSQL (docker requis)
+docker-compose up -d
 
-## Snapshots IA
-- Les snapshots sont stockés dans `.snapshots/` et suivent la config `.snapshots/config.json` (exclusion/inclusion de fichiers).
-- Toujours inclure les fichiers listés dans `included_patterns` même s’ils sont dans des dossiers exclus.
-- Utiliser `.snapshots/` comme source principale de contexte IA.
+# Backend (port 3000)
+cd backend && npm install && npm run dev  # nodemon avec hot-reload
 
-## Fichiers à consulter pour comprendre les patterns
-- `backend/src/app.js`, `backend/src/controllers/`, `backend/src/services/`
-- `frontend/src/App.tsx`, `frontend/src/components/`, `frontend/src/services/`
-- `.snapshots/config.json`, `.snapshots/readme.md`
+# Frontend (port 5173)
+cd frontend && npm install && npm run dev # Vite dev server
+```
 
----
+## Variables d'environnement backend
+Copier `backend/.env.example` vers `backend/.env` :
+- `DB_*` : connexion PostgreSQL (localhost:5432, user/pass: postgres, db: formadevis)
+- `JWT_SECRET` : cle de signature JWT
+- `SMTP_*` : configuration mail (optionnel)
 
-## Guide de création et d’installation du projet
+## Conventions a suivre
 
-Pour initialiser un nouveau projet FormaDevis, suivez ces étapes :
+### Structure backend (a creer)
+```
+backend/src/
+ controllers/   # Logique metier par entite
+ routes/        # Definition des endpoints
+ models/        # Schemas DB (Sequelize ou Prisma)
+ services/      # PDF, mail, logique transversale
+ middleware/    # Auth JWT, validation
+ config/        # Configuration centralisee
+```
 
-1. **Créer la structure du projet**
-   - Dossier racine : `formadevis/`
-   - Backend : `backend/src/{controllers,routes,models,services,middleware,config}`
-   - Frontend : `frontend/public`, `frontend/src/{components,pages,services,context,utils}`
+### Structure frontend (a creer)
+```
+frontend/src/
+ components/    # Composants reutilisables
+ pages/         # Ecrans/vues principales
+ services/      # Appels API (fetch/axios)
+ context/       # Contextes React (Auth, etc.)
+ utils/         # Helpers, formatage
+```
 
-2. **Initialiser le dépôt Git**
-   - `git init`
+### Patterns cles
+- **API Frontend** : centraliser dans `frontend/src/services/`, utiliser `VITE_API_URL` pour l'URL backend
+- **Auth** : JWT stocke cote client, middleware backend pour validation
+- **Typage** : TypeScript strict cote frontend, JSDoc cote backend
+- **CSS** : classes utilitaires Tailwind, eviter CSS custom
 
-3. **Créer les fichiers essentiels**
-   - Backend : `src/app.js`, `.env.example`, `package.json`
-   - Frontend : `src/App.tsx`, `src/main.tsx`, `public/logo-placeholder.png`, `package.json`, `tailwind.config.js`, `src/index.css`
-   - Racine : `docker-compose.yml`, `README.md`, `.gitignore`
+## Tests
+```bash
+cd frontend && npm test  # Vitest avec jsdom
+```
+Exemple de test : `frontend/src/App.test.tsx` utilise `@testing-library/react`
 
-4. **Installer les dépendances**
-   - Backend : `npm install` dans `backend/`
-   - Frontend : `npm install` dans `frontend/`
-
-5. **Configurer Tailwind CSS**
-   - Installer et initialiser Tailwind dans le frontend
-   - Mettre à jour `tailwind.config.js` et `src/index.css`
-
-6. **Configurer la base de données PostgreSQL**
-   - Utiliser `docker-compose.yml` pour lancer la DB locale
-
-7. **Variables d’environnement**
-   - Compléter `backend/.env.example` et copier vers `.env`
-
-8. **Lancer les serveurs**
-   - Backend : `npm run dev` ou `node src/app.js`
-   - Frontend : `npm run dev`
-
-9. **Accès**
-   - Frontend : http://localhost:5173
-   - Backend : http://localhost:3000
-
----
-
-**Astuce IA :** Pour toute analyse ou génération de code, se référer à la structure ci-dessus et aux fichiers de configuration pour garantir la cohérence avec les conventions du projet.
-
-**Remarque :** Si la structure évolue, mettez à jour `.snapshots/config.json` et ce fichier pour garantir la cohérence des analyses IA.
+## Etat du projet
+Le projet est en phase de scaffolding. Les dossiers `controllers/`, `routes/`, `models/`, `services/`, `components/`, `pages/` ne sont pas encore crees. Creer la structure au fur et a mesure des developpements.
