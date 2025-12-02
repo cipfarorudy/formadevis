@@ -9,3 +9,14 @@ npm-debug.log*
 !/backend/uploads/.gitkeep
 
 .fake
+
+# IDE et éditeur
+.vscode/
+.idea/
+
+# Fichiers de déploiement Azure
+.deployment
+.github/workflows/.deployment
+
+# Fichiers temporaires
+Untitled-*.md
